@@ -1,4 +1,4 @@
-#DESCRIPTION
+# DESCRIPTION
 
 Olifer is lightweight validator supporting Language Independent Validation Rules Specification (LIVR) for Erlang
 
@@ -20,7 +20,7 @@ See http://livr-spec.org for detailed documentation and list of supported rules.
 * Rules are be able to change results output ("trim", "nested_object", for example)
 * Multipurpose (user input validation, configs validation, contracts programming etc)
  
-#GETTING STARTED
+# GETTING STARTED
 1. Add as a dependency in your project:
   * For **rebar** add to rebar.config
    ```erl
@@ -45,7 +45,7 @@ See http://livr-spec.org for detailed documentation and list of supported rules.
 3. Run **olifer:start()** in your project start function.
 4. Thats all, now you can validate data, register your own rules or aliased built-in rules.
  
-#USAGE
+# USAGE
 **1. Validate data**
 
 Simple example:
