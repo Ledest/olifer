@@ -1,0 +1,7 @@
+/.erlang.mk
+/.rebar
+/deps
+/doc
+/ebin
+/logs
+/test/*.beam
