@@ -5,3 +5,4 @@
 /ebin
 /logs
 /test/*.beam
+/olifer.d
