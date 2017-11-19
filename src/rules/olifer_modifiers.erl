@@ -15,17 +15,24 @@
 
 %% API
 trim(Value, [], _) when is_binary(Value) ->
-    {filter, bstring:trim(Value)};
+    L = left_space_skip(Value, 0),
+    {filter, binary:part(Value, L, right_space_skip(Value, 0) - L)};
 trim(Value, [], _) ->
     {filter, Value}.
 
 to_lc(Value, [], _) when is_binary(Value) ->
-    {filter, bstring:to_lower(Value)};
+    {filter, <<<<if
+                     B >= $A, B =< $Z -> B + ($a - $A);
+                     true -> B
+                 end>> || <<B>> <= Value>>};
 to_lc(Value, [], _) ->
     {filter, Value}.
 
 to_uc(Value, [], _) when is_binary(Value) ->
-    {filter, bstring:to_upper(Value)};
+    {filter, <<<<if
+                     B >= $a, B =< $z -> B - ($a - $A);
+                     true -> B
+                 end>> || <<B>> <= Value>>};
 to_uc(Value, [], _) ->
     {filter, Value}.
 
@@ -57,9 +64,8 @@ default(Value, _Default, _AllData) ->
 %% INTERNAL
 remove_impl(Value, <<>>) ->
     {filter, Value};
-remove_impl(Value, <<First:1/binary, Rest/binary>>) ->
-    NewValueList = bstring:split_global(Value, First),
-    remove_impl(binary:list_to_bin(NewValueList), Rest).
+remove_impl(Value, <<First, Rest/binary>>) ->
+    remove_impl(<<<<B>> || <<B>> <= Value, B =/= First>>, Rest).
 
 leave_only_impl(<<>>, _, Acc) ->
     {filter, Acc};
@@ -67,4 +73,19 @@ leave_only_impl(<<First:1/binary, Rest/binary>>, Pattern, Acc) ->
     case binary:match(Pattern, First) of
         nomatch -> leave_only_impl(Rest, Pattern, Acc);
         _ -> leave_only_impl(Rest, Pattern, <<Acc/binary, First/binary>>)
+    end.
+
+left_space_skip(Value, I) ->
+    case byte_size(Value) =/= I andalso binary:at(Value, I) of
+        C when C =:= $\t; C =:= $\n; C =:= $\r; C =:= $\s -> left_space_skip(Value, I + 1);
+        _ -> I
+    end.
+
+right_space_skip(Value, I) ->
+    case byte_size(Value) of
+        I -> I;
+        S -> case binary:at(Value, S - I - 1) of
+                 C when C =:= $\t; C =:= $\n; C =:= $\r; C =:= $\s -> right_space_skip(Value, I + 1);
+                 _ -> S - I
+             end
     end.
